@@ -1,14 +1,17 @@
-// AdminScreen.tsx
-import React, { useState, useEffect, useRef } from 'react';
+// src/components/AdminScreen.tsx
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import Leaderboard from './Leaderboard';
-import './styles/AdminScreen.css';    // <-- import the stylesheet
+import TimerDisplay from './Timer';
+import { TimerContext } from '../context/TimerContext';
+import './styles/AdminScreen.css';
 
 interface AdminScreenProps {
-  /** called with 1–5 whenever that hoop goes in */
   onShotMade: (hoopIndex: number) => void;
 }
 
 const KEY_START = 'KeyY';
+const KEY_RESET = 'KeyU';
+
 const SHOT_KEYS = [
   { code: 'KeyQ', label: '1', points: 5 },
   { code: 'KeyW', label: '2', points: 10 },
@@ -17,74 +20,84 @@ const SHOT_KEYS = [
   { code: 'KeyT', label: '5', points: 50 },
 ] as const;
 
+// 1) your per‐shot sound files, in order
+const SHOT_SOUNDS = [
+  '/assets/sounds/shotSounds/shot1.mp3',
+  '/assets/sounds/shotSounds/shot2.mp3',
+  '/assets/sounds/shotSounds/shot3.mp3',
+  '/assets/sounds/shotSounds/shot4.mp3',
+  '/assets/sounds/shotSounds/shot5.mp3',
+] as const;
 
 const AdminScreen: React.FC<AdminScreenProps> = ({ onShotMade }) => {
-  const [timeLeft, setTimeLeft] = useState(30);
   const [score, setScore] = useState(0);
   const [pressed, setPressed] = useState<Record<string, boolean>>({});
-  const [running, setRunning] = useState(false);
-  const intervalRef = useRef<number | null>(null);
 
-  const reset = () => {
-    if (intervalRef.current) window.clearInterval(intervalRef.current);
-    setPressed({});
-    setScore(0);
-    setTimeLeft(30);
-    setRunning(false);
-  };
+  // pull from context
+  const { timeLeft, running, start, reset, addSeconds } =
+    useContext(TimerContext);
 
-  // timer
+  const buzzerRef = useRef<HTMLAudioElement>(null);
+
+  // play buzzer when clock hits zero
   useEffect(() => {
-    if (!running) return;
-    intervalRef.current = window.setInterval(() => {
-      setTimeLeft(t => {
-        if (t <= 1) {
-          window.clearInterval(intervalRef.current!);
-          setRunning(false);
-          return 0;
-        }
-        return t - 1;
-      });
-    }, 1000);
-    return () => window.clearInterval(intervalRef.current!);
-  }, [running]);
+    if (timeLeft === 0) {
+      buzzerRef.current?.play();
+    }
+  }, [timeLeft]);
 
-  // shots + video callback
+  // keyboard controls
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // start on Digit0
-      if (!running && e.code === KEY_START) {
+      // U always resets
+      if (e.code === KEY_RESET) {
         reset();
-        setTimeout(() => setRunning(true), 0);
+        setPressed({});
+        setScore(0);
         return;
       }
+
+      // Y starts (if not running)
+      if (!running && e.code === KEY_START) {
+        reset();
+        setPressed({});
+        setScore(0);
+        setTimeout(start, 0);
+        return;
+      }
+
+      // no shots if game isn't active
       if (!running || timeLeft <= 0) return;
 
+      // which shot key?
       const shot = SHOT_KEYS.find(k => k.code === e.code);
       if (!shot || pressed[e.code]) return;
 
-      // fire the external callback
-      const hoopIdx = parseInt(shot.label, 10);
-      onShotMade(hoopIdx);
+      // trigger video
+      onShotMade(parseInt(shot.label, 10));
 
-      // update pressed & scoring
+      // mark it pressed & update score
       const next = { ...pressed, [e.code]: true };
       setPressed(next);
       const madeCount = Object.keys(next).length;
 
+      // 2) play sequence sound
+      const soundSrc = SHOT_SOUNDS[madeCount - 1];
+      new Audio(soundSrc).play().catch(console.error);
+
       if (madeCount === SHOT_KEYS.length) {
-        window.clearInterval(intervalRef.current!);
+        // final basket: include leftover time
         setScore(s => s + shot.points + timeLeft);
-        setRunning(false);
+        reset();
       } else {
         setScore(s => s + shot.points);
-        setTimeLeft(t => t + 30);
+        addSeconds(2);
       }
     };
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [running, pressed, timeLeft, onShotMade]);
+  }, [running, pressed, timeLeft, onShotMade, reset, start, addSeconds]);
 
   const gameEnded =
     !running &&
@@ -92,16 +105,13 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onShotMade }) => {
 
   return (
     <div className="admin-screen">
-      {/* top row: timer & score */}
       <div className="top-row">
-        <div className="timer">⏱ {timeLeft}s</div>
+        <TimerDisplay timeLeft={timeLeft} />
         <div className="score">🏀 {score}</div>
       </div>
 
-      {/* Leaderboard */}
       <Leaderboard finalScore={score} gameEnded={gameEnded} />
 
-      {/* shot status wrapped in a card */}
       <div className="card shot-card">
         <div className="shot-status-row">
           {SHOT_KEYS.map(k => (
@@ -115,21 +125,36 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onShotMade }) => {
         </div>
       </div>
 
-      {/* buttons row */}
       <div className="button-row two-buttons">
         <button
           className="control-button"
           onClick={() => {
             reset();
-            setTimeout(() => setRunning(true), 0);
+            setPressed({});
+            setScore(0);
+            setTimeout(start, 0);
           }}
         >
           Start
         </button>
-        <button className="control-button" onClick={reset}>
+        <button
+          className="control-button"
+          onClick={() => {
+            reset();
+            setPressed({});
+            setScore(0);
+          }}
+        >
           Reset
         </button>
       </div>
+
+      {/* buzzer sound when time runs out */}
+      <audio
+        ref={buzzerRef}
+        src="/assets/sounds/buzzer.mp3"
+        preload="auto"
+      />
     </div>
   );
 };

@@ -1,4 +1,11 @@
 /* AdminScreen.css */
+@font-face {
+  font-family: 'Scoreboard';
+  src: url('../../assets/scoreboard.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
 
 .admin-screen {
     box-sizing: border-box;
@@ -18,13 +25,22 @@
     margin-bottom: 0.5rem;
   }
   
-  .timer,
-  .score {
+  .timer {
+    font-family: 'Scoreboard', monospace;
     font-size: 1.5rem;
     font-weight: bold;
   }
+
+  .score {
+    font-family: 'Scoreboard', monospace;
+    font-size: 1.5rem;
+    font-weight: bold;
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+  }
   
-  .shot-status-row {
+  .shot-status-row { 
     display: flex;
     justify-content: space-around;
     margin-bottom: 0.5rem;
