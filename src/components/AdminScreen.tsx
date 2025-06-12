@@ -7,6 +7,7 @@ import './styles/AdminScreen.css';
 
 interface AdminScreenProps {
   onShotMade: (hoopIndex: number) => void;
+  onResetVideos: () => void;
 }
 
 const KEY_START = 'KeyY';
@@ -20,24 +21,15 @@ const SHOT_KEYS = [
   { code: 'KeyT', label: '5', points: 50 },
 ] as const;
 
-// 1) your per‐shot sound files, in order
-const SHOT_SOUNDS = [
-  '/assets/sounds/shotSounds/shot1.mp3',
-  '/assets/sounds/shotSounds/shot2.mp3',
-  '/assets/sounds/shotSounds/shot3.mp3',
-  '/assets/sounds/shotSounds/shot4.mp3',
-  '/assets/sounds/shotSounds/shot5.mp3',
-] as const;
-
-const AdminScreen: React.FC<AdminScreenProps> = ({ onShotMade }) => {
+const AdminScreen: React.FC<AdminScreenProps> = ({ onShotMade, onResetVideos }) => {
   const [score, setScore] = useState(0);
   const [pressed, setPressed] = useState<Record<string, boolean>>({});
 
-  // pull from context
-  const { timeLeft, running, start, reset, addSeconds } =
-    useContext(TimerContext);
+  const { timeLeft, running, start, reset, addSeconds } = useContext(TimerContext);
 
   const buzzerRef = useRef<HTMLAudioElement>(null);
+  // single shot sound instance
+  const shotSoundRef = useRef(new Audio('/assets/sounds/shotSounds/shotSound.mp3'));
 
   // play buzzer when clock hits zero
   useEffect(() => {
@@ -46,47 +38,45 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onShotMade }) => {
     }
   }, [timeLeft]);
 
-  // keyboard controls
+  // keyboard & button logic
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      // U always resets
       if (e.code === KEY_RESET) {
         reset();
         setPressed({});
         setScore(0);
+        onResetVideos();
         return;
       }
 
-      // Y starts (if not running)
       if (!running && e.code === KEY_START) {
         reset();
         setPressed({});
         setScore(0);
+        onResetVideos();
         setTimeout(start, 0);
         return;
       }
 
-      // no shots if game isn't active
       if (!running || timeLeft <= 0) return;
 
-      // which shot key?
       const shot = SHOT_KEYS.find(k => k.code === e.code);
       if (!shot || pressed[e.code]) return;
 
-      // trigger video
       onShotMade(parseInt(shot.label, 10));
 
-      // mark it pressed & update score
+      // play the one shot sound
+      const s = shotSoundRef.current;
+      s.pause();
+      s.currentTime = 0;
+      s.play().catch(console.error);
+
+      // update pressed & score
       const next = { ...pressed, [e.code]: true };
       setPressed(next);
       const madeCount = Object.keys(next).length;
 
-      // 2) play sequence sound
-      const soundSrc = SHOT_SOUNDS[madeCount - 1];
-      new Audio(soundSrc).play().catch(console.error);
-
       if (madeCount === SHOT_KEYS.length) {
-        // final basket: include leftover time
         setScore(s => s + shot.points + timeLeft);
         reset();
       } else {
@@ -97,11 +87,9 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onShotMade }) => {
 
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [running, pressed, timeLeft, onShotMade, reset, start, addSeconds]);
+  }, [running, pressed, timeLeft, onShotMade, onResetVideos, reset, start, addSeconds]);
 
-  const gameEnded =
-    !running &&
-    (timeLeft === 0 || Object.keys(pressed).length === SHOT_KEYS.length);
+  const gameEnded = !running && (timeLeft === 0 || Object.keys(pressed).length === SHOT_KEYS.length);
 
   return (
     <div className="admin-screen">
@@ -117,9 +105,8 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onShotMade }) => {
           {SHOT_KEYS.map(k => (
             <div key={k.code} className="shot-key">
               <div className="shot-label">{k.label}</div>
-              <div className="shot-indicator">
-                {pressed[k.code] ? '✅' : '❌'}
-              </div>
+              <div className="shot-indicator">{pressed[k.code] ? '✅' : '❌'}</div>
+              <div className="shot-keybind">{k.code.replace('Key', '')}</div>
             </div>
           ))}
         </div>
@@ -132,10 +119,11 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onShotMade }) => {
             reset();
             setPressed({});
             setScore(0);
+            onResetVideos();
             setTimeout(start, 0);
           }}
         >
-          Start
+          Start {'{'}{KEY_START.replace('Key', '')}{'}'}
         </button>
         <button
           className="control-button"
@@ -143,18 +131,14 @@ const AdminScreen: React.FC<AdminScreenProps> = ({ onShotMade }) => {
             reset();
             setPressed({});
             setScore(0);
+            onResetVideos();
           }}
         >
-          Reset
+          Reset {'{'}{KEY_RESET.replace('Key', '')}{'}'}
         </button>
       </div>
 
-      {/* buzzer sound when time runs out */}
-      <audio
-        ref={buzzerRef}
-        src="/assets/sounds/buzzer.mp3"
-        preload="auto"
-      />
+      <audio ref={buzzerRef} src="/assets/sounds/buzzer.mp3" preload="auto" />
     </div>
   );
 };

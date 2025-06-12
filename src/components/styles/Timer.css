@@ -1,8 +1,11 @@
 @font-face {
-    font-family: 'Scoreboard';
-    src: url('../../assets/scoreboard.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-  }
+  font-family: 'Scoreboard';
+  src: url('../../assets/scoreboard.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
-  
+.timer {
+  font-family: 'Scoreboard', sans-serif;
+  color: white;
+}
