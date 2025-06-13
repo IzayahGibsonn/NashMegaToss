@@ -5,7 +5,7 @@ import TimerDisplay from './components/Timer';
 import { TimerContext } from './context/TimerContext';
 import './App.css';
 
-const TEST_VIDEO = '/assets/videos/ritz_video.mp4';
+const TEST_VIDEO = '/assets/videos/ritz_2500.mp4';
 
 // now each TV can have its own `video` field
 const TVs = [
@@ -65,8 +65,17 @@ const MainScreen: React.FC = () => {
       ))}
 
       <div className="cell admin-cell">
-        <AdminScreen onShotMade={playVideo} onResetVideos={resetAllVideos} />
-      </div>
+  <video
+    src={TEST_VIDEO}
+    muted
+    loop
+    autoPlay
+    className="video-bg"
+  />
+  <div className="cell-overlay">
+    <AdminScreen onShotMade={playVideo} onResetVideos={resetAllVideos} />
+  </div>
+</div>
     </div>
   );
 };
