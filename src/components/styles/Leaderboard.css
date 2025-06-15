@@ -5,7 +5,7 @@
   box-shadow: 0 -4px 10px rgba(0,0,0,0.3);
 
   position: absolute;
-  bottom: 10px;
+  bottom: 30px;
   right: 20px;
   width: 200px;           /* pick whatever fixed width you like */
   padding: 10px;          /* less padding = smaller box */

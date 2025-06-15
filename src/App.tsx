@@ -5,15 +5,16 @@ import TimerDisplay from './components/Timer';
 import { TimerContext } from './context/TimerContext';
 import './App.css';
 
-const TEST_VIDEO = '/assets/videos/ritz_2500.mp4';
+const HOOP_VIDEO = '/assets/videos/ritz_2500.mp4';
+const SCORE_VIDEO = '/assets/videos/score_video.mp4';
 
 // now each TV can have its own `video` field
 const TVs = [
-  { label: 'TV 1', hoop: 1, video: TEST_VIDEO },
-  { label: 'TV 2', hoop: 2, video: TEST_VIDEO },
-  { label: 'TV 3', hoop: 3, video: TEST_VIDEO },
-  { label: 'TV 4', hoop: 4, video: TEST_VIDEO },
-  { label: 'TV 5', hoop: 5, video: TEST_VIDEO },
+  { label: 'TV 1', hoop: 1, video: HOOP_VIDEO },
+  { label: 'TV 2', hoop: 2, video: HOOP_VIDEO },
+  { label: 'TV 3', hoop: 3, video: HOOP_VIDEO },
+  { label: 'TV 4', hoop: 4, video: HOOP_VIDEO },
+  { label: 'TV 5', hoop: 5, video: HOOP_VIDEO },
 ];
 
 const MainScreen: React.FC = () => {
@@ -66,7 +67,7 @@ const MainScreen: React.FC = () => {
 
       <div className="cell admin-cell">
   <video
-    src={TEST_VIDEO}
+    src={SCORE_VIDEO}
     muted
     loop
     autoPlay
