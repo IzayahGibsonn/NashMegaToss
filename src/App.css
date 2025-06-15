@@ -2,13 +2,39 @@
 
 .grid {
   display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   width: 100vw;
   height: 100vh;
-  margin: 0;
-  padding: 0;
 }
+
+.cell {
+  position: relative;
+  overflow: hidden;
+}
+
+.video-bg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+.cell-overlay {
+  position: absolute;
+  inset: 0;                    /* shorthand for top/right/bottom/left: 0 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;                 /* sit on top of the video */
+  pointer-events: none;        /* let clicks pass through unless you override */
+}
+
+/* enable clicks inside your admin screen */
+.admin-screen {
+  pointer-events: auto;
+}
+
+
 .timer {
   position: absolute;
   bottom: 5px;
@@ -18,35 +44,3 @@
   color: rgb(221, 240, 21);
   font-weight: bold;
 }
-
-.video-bg {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0; /* background layer */
-}
-
-.cell {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-.admin-cell {
-  position: relative;
-  padding: 0;
-  flex-direction: column;
-  justify-content: flex-start;
-  z-index: 0; /* admin cell itself can stay default */
-}
-
-.cell-overlay {
-  position: relative;
-  z-index: 2; /* overlay content goes above video */
-}
-
