@@ -1,0 +1,25 @@
+@font-face {
+    font-family: 'Scoreboard';
+    src: url('../../assets/scoreboard.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
+  
+  .countdown-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.75);
+    z-index: 10;
+  }
+  
+  .countdown-text {
+    font-family: 'Scoreboard', monospace;
+    font-size: 8rem;   /* adjust as needed */
+    color: #fff;
+    font-weight: bold;
+    user-select: none;
+  }
+  

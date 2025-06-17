@@ -34,14 +34,18 @@
   pointer-events: auto;
 }
  
-
 .timer {
   position: absolute;
   bottom: 5px;
   left: 5px;
   z-index: 10;
-  font-size: 3rem;
+  font-size: 5rem;           /* was 3rem */
   color: rgb(221, 240, 21);
   font-weight: bold;
-  padding-left: 25px
+  padding-left: 1.5rem;      /* scaled to match */
+}
+
+/* whenever a countdown-overlay exists in this cell, hide the timer */
+.cell .countdown-overlay ~ .timer {
+  visibility: hidden;
 }

@@ -9,7 +9,7 @@ interface TimerDisplayProps {
 const TimerDisplay: React.FC<TimerDisplayProps> = ({ timeLeft }) => {
   return (
     <div className="timer">
-      {timeLeft}s
+      {timeLeft}
     </div>
   );
 };
